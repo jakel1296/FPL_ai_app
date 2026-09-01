@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HTML Test</title>
+</head>
+<body>
+    <h1 id="id-test">Loading...</h1>
+
+    <script>
+     fetch("http://127.0.0.1:8001/hello")
+      .then(response => response.json())
+      .then(data => {
+       document.getElementById("id-test").textContent = data.message;
+      });
+    </script>
+</body>
+</html>
