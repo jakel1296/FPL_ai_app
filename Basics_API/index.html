@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Basics: A Beginner's Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        main {
+            padding: 40px 30px;
+        }
+
+        section {
+            margin-bottom: 50px;
+        }
+
+        h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #764ba2;
+            font-size: 1.3em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .definition-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .definition-box strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .get-box {
+            border-left-color: #28a745;
+        }
+
+        .get-box strong {
+            color: #28a745;
+        }
+
+        .post-box {
+            border-left-color: #ff6b6b;
+        }
+
+        .post-box strong {
+            color: #ff6b6b;
+        }
+
+        .diagram {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+
+        .diagram-box {
+            display: inline-block;
+            background: white;
+            border: 2px solid #667eea;
+            padding: 15px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            min-width: 120px;
+        }
+
+        .arrow {
+            display: inline-block;
+            margin: 0 10px;
+            font-size: 1.5em;
+            color: #667eea;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .component {
+            display: inline-block;
+            background: white;
+            border: 2px solid #667eea;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+
+        .server-component {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .client-component {
+            border-color: #28a745;
+            color: #28a745;
+        }
+
+        .explanation {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            line-height: 1.8;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .matrix-title {
+            font-size: 1.5em;
+            color: #667eea;
+            margin: 30px 0 20px 0;
+            font-weight: 600;
+        }
+
+        .small-table {
+            width: 100%;
+            margin: 15px 0;
+        }
+
+        .small-table th {
+            background: #667eea;
+        }
+
+        footer {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌐 API Basics</h1>
+            <p>A Beginner's Guide to Understanding APIs</p>
+        </header>
+
+        <main>
+            <!-- Definitions Section -->
+            <section>
+                <h2>📚 Key Definitions</h2>
+
+                <div class="definition-box">
+                    <strong>API (Application Programming Interface)</strong>
+                    A set of rules that allows two programs to communicate with each other. Think of it like a restaurant menu—you (the client) request items from the menu, and the restaurant (the server) prepares and delivers them.
+                </div>
+
+                <div class="definition-box">
+                    <strong>Server</strong>
+                    A computer program that waits for requests from clients and sends back responses. It's like a restaurant kitchen that receives orders and prepares food.
+                </div>
+
+                <div class="definition-box">
+                    <strong>Client</strong>
+                    A computer program that makes requests to a server. It's like a customer ordering food from a restaurant.
+                </div>
+
+                <div class="definition-box">
+                    <strong>HTTP (HyperText Transfer Protocol)</strong>
+                    The language/rules that clients and servers use to communicate over the internet. It's the standard protocol for web communication.
+                </div>
+
+                <div class="definition-box get-box">
+                    <strong>GET Request</strong>
+                    A request to <em>retrieve</em> or <em>read</em> data from a server. It's like asking "Can I have the menu?" or "Tell me what items you have." GET requests don't change anything on the server—they just fetch information.
+                    <br><br>
+                    <em>Example: Getting the current weather, reading a blog post, fetching a list of users</em>
+                </div>
+
+                <div class="definition-box post-box">
+                    <strong>POST Request</strong>
+                    A request to <em>send</em> or <em>create</em> data on the server. It's like saying "Here's my order" or "Please save this information." POST requests can change data on the server.
+                    <br><br>
+                    <em>Example: Submitting a form, uploading a file, creating a new user account</em>
+                </div>
+
+                <div class="definition-box">
+                    <strong>Endpoint</strong>
+                    A specific URL path on a server that performs a particular action. Think of it like a specific service counter in a store.
+                    <br><br>
+                    <em>Examples: /string, /json, /echo-string, /echo-json</em>
+                </div>
+
+                <div class="definition-box">
+                    <strong>Response</strong>
+                    The data that a server sends back to a client after processing a request. It includes a status code (indicating success or failure) and the requested data.
+                </div>
+
+                <div class="definition-box">
+                    <strong>Status Code</strong>
+                    A three-digit number that tells you the result of a request:
+                    <br>
+                    • <strong>200</strong> = Success (request worked perfectly)
+                    <br>
+                    • <strong>404</strong> = Not Found (endpoint doesn't exist)
+                    <br>
+                    • <strong>400</strong> = Bad Request (something wrong with your request)
+                </div>
+            </section>
+
+            <!-- General Explainer -->
+            <section>
+                <h2>💡 How APIs Work</h2>
+
+                <div class="explanation">
+                    <strong>The Big Picture:</strong>
+                    <br><br>
+                    An API is like having a conversation between two programs. One program (the client) asks a question or makes a request, and another program (the server) listens, processes the request, and sends back an answer. This conversation happens over the internet using HTTP—a standardized protocol that both programs understand.
+                </div>
+
+                <h3>Step-by-Step Flow</h3>
+
+                <div class="flow-step">
+                    <div class="step-number">1</div>
+                    <div><strong>Client Prepares a Request</strong><br>The client decides what information it needs and creates a request (GET for reading, POST for sending).</div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="step-number">2</div>
+                    <div><strong>Client Sends Request to Server</strong><br>The request travels across the internet to the server, including the endpoint, method (GET/POST), and any data being sent.</div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="step-number">3</div>
+                    <div><strong>Server Receives & Processes</strong><br>The server receives the request, understands what the client wants, and processes it (fetches data, saves data, runs calculations, etc.).</div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="step-number">4</div>
+                    <div><strong>Server Sends Response</strong><br>The server sends back a response that includes a status code (was it successful?) and the requested/processed data.</div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="step-number">5</div>
+                    <div><strong>Client Receives & Uses Response</strong><br>The client receives the response and uses the data (displays it, stores it, processes it further, etc.).</div>
+                </div>
+
+                <h3>Visual Diagram</h3>
+                <div class="diagram">
+                    <div style="margin: 20px 0;">
+                        <div class="diagram-box" style="background: #e7f3ff;">📱 <strong>Client</strong><br>(Your Program)</div>
+
+                        <div class="arrow">→</div>
+
+                        <div class="diagram-box" style="background: #fff3e0;">
+                            <strong>HTTP Request</strong><br>
+                            <small>GET /json<br>POST /echo-string<br>+ Data (if POST)</small>
+                        </div>
+
+                        <div class="arrow">→</div>
+
+                        <div class="diagram-box" style="background: #ffe0e0;">🖥️ <strong>Server</strong><br>(Their Program)</div>
+                    </div>
+
+                    <div style="margin: 20px 0;">
+                        <div class="diagram-box" style="background: #e7f3ff;">📱 <strong>Client</strong><br>(Your Program)</div>
+
+                        <div class="arrow">←</div>
+
+                        <div class="diagram-box" style="background: #fff3e0;">
+                            <strong>HTTP Response</strong><br>
+                            <small>Status: 200<br>Data: {...}</small>
+                        </div>
+
+                        <div class="arrow">←</div>
+
+                        <div class="diagram-box" style="background: #ffe0e0;">🖥️ <strong>Server</strong><br>(Their Program)</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Requirements Matrix -->
+            <section>
+                <h2>🛠️ Implementation Requirements Matrix</h2>
+
+                <div class="explanation">
+                    <strong>What You Need to Build:</strong>
+                    <br><br>
+                    Below is a detailed matrix showing what components and libraries are required to build an API with both barebones HTTP and FastAPI approaches. This shows the fundamental difference between building from scratch vs. using a framework.
+                </div>
+
+                <div class="matrix-title">Server Requirements</div>
+                <table class="small-table">
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Barebones HTTP</th>
+                            <th>FastAPI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Core Library</strong></td>
+                            <td><code>http.server</code> (Python built-in)</td>
+                            <td><code>fastapi</code> + <code>uvicorn</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Handler Class</strong></td>
+                            <td>Inherit from <code>BaseHTTPRequestHandler</code></td>
+                            <td>Define functions with decorators (@app.get, @app.post)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>HTTP Methods</strong></td>
+                            <td>Write <code>do_GET()</code>, <code>do_POST()</code> methods</td>
+                            <td>Decorators automatically handle methods</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Request Parsing</strong></td>
+                            <td>Manual: <code>self.rfile.read()</code>, <code>json.loads()</code></td>
+                            <td>Automatic: Type hints handle conversion</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Response Sending</strong></td>
+                            <td>Manual: <code>send_response()</code>, <code>send_header()</code>, <code>wfile.write()</code></td>
+                            <td>Automatic: Return Python objects, FastAPI converts to JSON</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Error Handling</strong></td>
+                            <td>Manual: <code>try/except</code> for each endpoint</td>
+                            <td>Built-in with <code>HTTPException</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>CORS Support</strong></td>
+                            <td>Manual header manipulation required</td>
+                            <td>Built-in with <code>CORSMiddleware</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Server Startup</strong></td>
+                            <td><code>HTTPServer().serve_forever()</code></td>
+                            <td><code>uvicorn.run(app, host, port)</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="matrix-title">Client Requirements</div>
+                <table class="small-table">
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Barebones HTTP</th>
+                            <th>FastAPI (Same Code!)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Core Library</strong></td>
+                            <td><code>urllib.request</code> (Python built-in)</td>
+                            <td><code>urllib.request</code> (Python built-in)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Making Requests</strong></td>
+                            <td><code>urllib.request.urlopen()</code></td>
+                            <td><code>urllib.request.urlopen()</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>GET Requests</strong></td>
+                            <td><code>urllib.request.urlopen(url)</code></td>
+                            <td><code>urllib.request.urlopen(url)</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>POST Requests</strong></td>
+                            <td>Create <code>Request()</code> object with data</td>
+                            <td>Create <code>Request()</code> object with data</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Headers</strong></td>
+                            <td>Manually set in <code>Request(headers={})</code></td>
+                            <td>Manually set in <code>Request(headers={})</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Response Parsing</strong></td>
+                            <td>Manual: <code>response.read().decode()</code>, <code>json.loads()</code></td>
+                            <td>Manual: <code>response.read().decode()</code>, <code>json.loads()</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Error Handling</strong></td>
+                            <td><code>urllib.error.URLError</code></td>
+                            <td><code>urllib.error.URLError</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Only Change Needed</strong></td>
+                            <td>Port: 8002</td>
+                            <td>Port: 8003</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="explanation" style="margin-top: 30px;">
+                    <strong>Key Insight:</strong>
+                    <br><br>
+                    Notice that the <strong>client code is essentially identical</strong> for both approaches! The client doesn't care whether the server is using barebones HTTP or FastAPI—it just sends HTTP requests using <code>urllib</code>. The real difference is on the server side: FastAPI makes writing servers much easier and less error-prone by handling many details automatically.
+                    <br><br>
+                    This demonstrates why frameworks exist: they reduce boilerplate code, provide built-in best practices, and let you focus on your actual application logic rather than HTTP plumbing.
+                </div>
+            </section>
+
+            <!-- Summary -->
+            <section>
+                <h2>✨ Summary</h2>
+
+                <div class="explanation">
+                    <strong>Remember:</strong>
+                    <br><br>
+                    • An <strong>API</strong> is a way for two programs to talk to each other<br>
+                    • The <strong>server</strong> listens and responds to requests<br>
+                    • The <strong>client</strong> makes requests and processes responses<br>
+                    • <strong>GET</strong> = asking for information (read-only)<br>
+                    • <strong>POST</strong> = sending information to be stored or processed<br>
+                    • <strong>HTTP</strong> is the language they use to communicate<br>
+                    • Frameworks like <strong>FastAPI</strong> make building servers much easier
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Created to explain API basics to complete beginners</p>
+        </footer>
+    </div>
+</body>
+</html>
