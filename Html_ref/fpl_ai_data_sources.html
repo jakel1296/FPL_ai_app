@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FPL AI — Data Sources & Field Map</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#18181b; --muted:#6b7280; --line:#e4e4e7;
+    --fpl:#37003c; --fpl-bg:#f3e8f5;
+    --fix:#0b5ed7; --fix-bg:#e6efff;
+    --price:#b45309; --price-bg:#fff4e0;
+    --pl:#047857; --pl-bg:#e3f7ef;
+    --und:#7c3aed; --und-bg:#f0e9ff;
+    --der:#475569; --der-bg:#eceff3;
+    --warn:#b91c1c; --warn-bg:#fdecec;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif}
+  header{background:var(--card);border-bottom:1px solid var(--line);padding:28px 24px}
+  .wrap{max-width:1200px;margin:0 auto}
+  h1{margin:0 0 6px;font-size:26px;letter-spacing:-.01em}
+  .sub{color:var(--muted);margin:0}
+  main{padding:24px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:22px;scroll-margin-top:16px}
+  h2{margin:0 0 4px;font-size:19px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  h3{margin:18px 0 8px;font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 24px;margin:12px 0 6px;padding:12px 14px;background:var(--bg);border-radius:8px;font-size:14px}
+  .meta b{display:block;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+  .fpl{background:var(--fpl-bg);color:var(--fpl)} .fix{background:var(--fix-bg);color:var(--fix)}
+  .price{background:var(--price-bg);color:var(--price)} .pl{background:var(--pl-bg);color:var(--pl)}
+  .und{background:var(--und-bg);color:var(--und)} .der{background:var(--der-bg);color:var(--der)}
+  .warn{background:var(--warn-bg);color:var(--warn)}
+  .method{font-size:13px;font-weight:600;color:var(--ink)}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+  th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);border-bottom:2px solid var(--line);padding:8px 10px;position:sticky;top:0;background:var(--card)}
+  td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  code{font-family:var(--mono);font-size:13px;background:var(--bg);padding:1px 5px;border-radius:4px}
+  .note{font-size:13px;color:var(--muted);margin:10px 0 0}
+  .callout{border-left:4px solid var(--price);background:var(--price-bg);padding:10px 14px;border-radius:6px;margin:12px 0;font-size:14px}
+  .callout.red{border-color:var(--warn);background:var(--warn-bg)}
+  .callout.blue{border-color:var(--fix);background:var(--fix-bg)}
+  .toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:16px 0 0}
+  input[type=search]{flex:1;min-width:240px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:var(--card)}
+  .count{color:var(--muted);font-size:13px}
+  nav a{display:inline-block;margin:6px 8px 0 0;font-size:13px;text-decoration:none;color:var(--fix)}
+  ul{margin:6px 0 0;padding-left:20px}
+  .flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
+  .flow div{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;background:var(--bg)}
+  .flow div b{display:block;margin-bottom:4px}
+  @media print{ body{background:#fff} section{break-inside:avoid;border:none;padding:0 0 12px} .toolbar,nav{display:none} th{position:static} }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>FPL AI — Data Sources &amp; Field Map</h1>
+  <p class="sub">Every field the application retrieves or derives, the source it comes from, and how the data is transferred. Compiled from the <em>Data Sources &amp; Field Reference</em> and the <em>bootstrap-static</em> API reference (fetched 20 Sep 2026, 2026/27 season). Principle: <strong>raw official data → raw underlying data → our calculations</strong>.</p>
+  <nav>
+    <a href="#sources">Source summary</a> · <a href="#players">1 Players</a> · <a href="#teams">2 Teams</a> · <a href="#fixtures">3 Fixtures</a> · <a href="#gameweeks">4 Gameweeks</a> · <a href="#price">5 Price changes</a> · <a href="#news">6 Team news</a> · <a href="#understat">7 Understat</a> · <a href="#derived">8 Derived</a>
+  </nav>
+  <div class="toolbar">
+    <input type="search" id="q" placeholder="Filter fields… e.g. cost, xG, deadline">
+    <span class="count" id="count"></span>
+  </div>
+</div></header>
+
+<main><div class="wrap">
+
+<!-- ===================== SOURCE SUMMARY ===================== -->
+<section id="sources">
+  <h2>Source summary &amp; data-transfer methods</h2>
+  <p class="note">The backend is the only component that talks to these sources. The frontend and the LLM never call them directly.</p>
+  <table>
+    <thead><tr><th>Source</th><th>Role in the hierarchy</th><th>Transfer method</th><th>Endpoint / access</th><th>Auth</th><th>Format</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="pill fpl">Official FPL API — bootstrap-static</span></td>
+        <td>Primary source for FPL-specific data: identity, price, ownership, points, minutes, availability, transfers, gameweeks, official FPL xG/xA fields</td>
+        <td class="method">REST API — HTTP GET, polled by the backend</td>
+        <td><code>GET https://fantasy.premierleague.com/api/bootstrap-static/</code> (~1 MB, one payload)</td>
+        <td>None</td>
+        <td>JSON</td>
+      </tr>
+      <tr>
+        <td><span class="pill fix">Official FPL API — fixtures</span></td>
+        <td>Primary source for fixture list, kick-offs, results and FDR</td>
+        <td class="method">REST API — HTTP GET</td>
+        <td><code>GET https://fantasy.premierleague.com/api/fixtures/</code> (or <code>?event={gw}</code>)</td>
+        <td>None</td>
+        <td>JSON</td>
+      </tr>
+      <tr>
+        <td><span class="pill price">Official FPL Price Change Predictor</span></td>
+        <td>Price-rise/fall progress — checked in every weekly analysis; feeds transfer-timing advice</td>
+        <td class="method">REST API — HTTP GET (same bootstrap-static payload; refreshed by FPL every ~15 min)</td>
+        <td>Surfaced as the <code>price_change_*</code> fields on each player in <code>bootstrap-static</code>, plus <code>game_config.settings.price_change_deadlines</code></td>
+        <td>None</td>
+        <td>JSON</td>
+      </tr>
+      <tr>
+        <td><span class="pill pl">Official Premier League / club sources</span></td>
+        <td>Authoritative team news: injuries, suspensions, manager quotes, confirmed XIs</td>
+        <td class="method">Web retrieval — HTTP GET of official pages / RSS feeds, parsed by the backend (no public JSON API); manual entry as an initial fallback</td>
+        <td>premierleague.com news &amp; club official sites (URLs configured per club)</td>
+        <td>None</td>
+        <td>HTML / RSS → parsed to structured records</td>
+      </tr>
+      <tr>
+        <td><span class="pill und">Understat</span></td>
+        <td>Canonical source for underlying performance data (xG, xA, npxG, shots…)</td>
+        <td class="method">Web scraping — HTTP GET of Understat pages; JSON embedded in page <code>&lt;script&gt;</code> tags is extracted and parsed (no official API)</td>
+        <td><code>https://understat.com/league/EPL</code>, <code>/team/{name}/{season}</code>, <code>/player/{id}</code></td>
+        <td>None</td>
+        <td>HTML with embedded JSON</td>
+      </tr>
+      <tr>
+        <td><span class="pill der">Derived — our Python engine</span></td>
+        <td>Calculations and interpretation built on the stored data. Never sourced externally.</td>
+        <td class="method">Internal — computed by the FastAPI analysis engine from SQLite; no external transfer</td>
+        <td>SQLite tables → analysis engine → REST/JSON to frontend</td>
+        <td>n/a</td>
+        <td>Python objects / JSON</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Pipeline</h3>
+  <div class="flow">
+    <div><b>Official FPL API</b>identity, price, ownership, FPL points, minutes, starts, fixtures, FDR, availability, transfers, official xG/xA</div>
+    <div><b>Official PL / club sources</b>injuries, suspensions, manager comments, predicted/confirmed selection, team news</div>
+    <div><b>Understat</b>underlying attacking/defensive process: xG, xA, npxG, npxG+xA, shots, key passes</div>
+    <div><b>Derived fields</b>minutes reliability, per-90 rates, points/£, xG/£, fixture-adjusted projections, opportunity cost, price-rise interpretation, BUY/HOLD/WAIT</div>
+  </div>
+
+  <h3>API conventions to remember</h3>
+  <ul>
+    <li><strong>Prices are integers ×10</strong> — <code>now_cost: 60</code> = £6.0m (<code>game_settings.ui_currency_multiplier</code> = 10).</li>
+    <li><strong>Many numeric stats arrive as strings</strong> (<code>form</code>, <code>selected_by_percent</code>, <code>expected_*</code>, <code>ep_next</code>…). Cast to float/Decimal in Pydantic models. <code>*_per_90</code> fields are real floats.</li>
+    <li><strong><code>id</code> is season-specific; <code>code</code> is permanent.</strong> Join on <code>id</code> within a season, use <code>code</code> for cross-season history.</li>
+    <li>Timestamps are ISO 8601 UTC. The FPL API has no official documentation — re-fetch and diff field names at the start of each season.</li>
+  </ul>
+</section>
+
+<!-- ===================== 1 PLAYERS ===================== -->
+<section id="players" data-src="Official FPL bootstrap-static API">
+  <h2>1. Player fields <span class="pill fpl">Official FPL bootstrap-static API</span></h2>
+  <div class="meta">
+    <div><b>Transfer method</b>REST API — HTTP GET, JSON, no auth</div>
+    <div><b>Payload key</b><code>elements[]</code> (~750 players)</div>
+    <div><b>Primary key</b><code>id</code> (season) · <code>code</code> (permanent)</div>
+  </div>
+  <table class="fields">
+    <thead><tr><th>Field</th><th>What it means</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>Unique FPL player ID (season-specific)</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>code</code></td><td>Official FPL player code (permanent, stable across seasons)</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>first_name</code></td><td>Player's first name</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>second_name</code></td><td>Player's surname/display name</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>web_name</code></td><td>FPL display name</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>team</code></td><td>Numeric ID of the player's current FPL team → <code>teams[].id</code></td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>team_code</code></td><td>Official club/team code → <code>teams[].code</code></td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>element_type</code></td><td>FPL position ID: 1 GKP / 2 DEF / 3 MID / 4 FWD</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>now_cost</code></td><td>Current FPL price, in £0.1m units</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>cost_change_start</code></td><td>Net price change since the start of the season (×10)</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>cost_change_event</code></td><td>Price change during the current GW</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>cost_change_start_fall</code></td><td>Number of £0.1m price drops since GW1</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>cost_change_event_fall</code></td><td>Number of £0.1m price drops in current GW</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>total_points</code></td><td>FPL points scored this season</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>points_per_game</code></td><td>Average FPL points per appearance/game</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>form</code></td><td>Recent FPL form (avg points over last 30 days)</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>selected_by_percent</code></td><td>Percentage of FPL teams owning the player</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>transfers_in</code></td><td>Total transfers into the player this season</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>transfers_out</code></td><td>Total transfers out this season</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>transfers_in_event</code></td><td>Transfers in during current GW</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>transfers_out_event</code></td><td>Transfers out during current GW</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>minutes</code></td><td>Minutes played</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>starts</code></td><td>Number of starts</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>appearances</code> <span class="pill warn">verify</span></td><td>Number of appearances — <em>not present in today's bootstrap-static payload; derive from <code>element-summary/{id}/</code> history if needed</em></td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>goals_scored</code></td><td>Goals scored</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>assists</code></td><td>Assists (FPL definition)</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>clean_sheets</code></td><td>Clean sheets (≥60 min played)</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>goals_conceded</code></td><td>Goals conceded while playing</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>saves</code></td><td>Goalkeeper saves</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>penalties_saved</code></td><td>Penalties saved</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>penalties_missed</code></td><td>Penalties missed</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>yellow_cards</code></td><td>Yellow cards</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>red_cards</code></td><td>Red cards</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>own_goals</code></td><td>Own goals</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>bonus</code></td><td>Bonus points earned</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>bps</code></td><td>Baseline Bonus Points System score</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>influence</code></td><td>FPL Influence metric</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>creativity</code></td><td>FPL Creativity metric</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>threat</code></td><td>FPL Threat metric</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>ict_index</code></td><td>Combined ICT score</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>expected_goals</code></td><td>Official FPL expected goals statistic (season)</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>expected_assists</code></td><td>Official FPL expected assists statistic</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>expected_goal_involvements</code></td><td>xG + xA</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>expected_goals_conceded</code></td><td>Expected goals conceded while on pitch</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>value_form</code></td><td>FPL's form-per-price metric (<code>form / price</code>)</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>value_season</code></td><td>FPL's season-points-per-price metric (<code>total_points / price</code>)</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>ep_this</code></td><td>FPL's expected points for this GW</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>ep_next</code></td><td>FPL's expected points for next GW</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>status</code></td><td>Player availability status: <code>a</code> available, <code>d</code> doubtful, <code>i</code> injured, <code>s</code> suspended, <code>u</code> unavailable, <code>n</code> not in squad</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>news</code></td><td>FPL injury/suspension/availability note</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>news_added</code></td><td>Timestamp associated with the latest player news</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>chance_of_playing_next_round</code></td><td>FPL estimated % chance of playing next GW (null = no flag)</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>chance_of_playing_this_round</code></td><td>FPL estimated % chance of playing current GW</td><td>Official FPL bootstrap-static API</td></tr>
+    </tbody>
+  </table>
+  <div class="callout"><strong>Important:</strong> some of these are raw inputs rather than recommendation drivers. <code>influence</code>, <code>creativity</code> and <code>threat</code> are retrieved, but the stated preference is to prioritise underlying xG/xA/xGC (from Understat) over FPL's points-derived metrics.</div>
+</section>
+
+<!-- ===================== 2 TEAMS ===================== -->
+<section id="teams">
+  <h2>2. Team fields <span class="pill fpl">Official FPL bootstrap-static API</span></h2>
+  <div class="meta">
+    <div><b>Transfer method</b>REST API — HTTP GET, JSON, no auth</div>
+    <div><b>Payload key</b><code>teams[]</code> (20 clubs)</div>
+    <div><b>Primary key</b><code>id</code> (season) · <code>code</code> (permanent)</div>
+  </div>
+  <table class="fields">
+    <thead><tr><th>Field</th><th>What it means</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>Unique FPL team ID (alphabetical 1–20, season-specific)</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>name</code></td><td>Club name</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>short_name</code></td><td>Three-letter/short club name</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>code</code></td><td>Official club code (permanent; used for badge/shirt images)</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>strength</code></td><td>Overall FPL fixture-strength rating 1–5 <em>(null at time of fetch — may populate later)</em></td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>strength_overall_home</code></td><td>Home strength rating</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>strength_overall_away</code></td><td>Away strength rating</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>strength_attack_home</code></td><td>Home attacking strength</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>strength_attack_away</code></td><td>Away attacking strength</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>strength_defence_home</code></td><td>Home defensive strength</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>strength_defence_away</code></td><td>Away defensive strength</td><td>Official FPL bootstrap-static API</td></tr>
+    </tbody>
+  </table>
+  <p class="note">The <code>strength_*</code> fields are the only useful fixture-difficulty inputs here; for proper FDR use the fixtures endpoint (<code>team_h_difficulty</code> / <code>team_a_difficulty</code>). The <code>played</code>/<code>win</code>/<code>points</code>/<code>position</code> table fields are not maintained by FPL (always 0) — don't rely on them.</p>
+</section>
+
+<!-- ===================== 3 FIXTURES ===================== -->
+<section id="fixtures">
+  <h2>3. Fixture fields <span class="pill fix">Official FPL fixtures API</span></h2>
+  <div class="meta">
+    <div><b>Transfer method</b>REST API — HTTP GET, JSON, no auth</div>
+    <div><b>Endpoint</b><code>/api/fixtures/</code> · <code>/api/fixtures/?event={gw}</code></div>
+    <div><b>Used for</b>fixture run, FDR, rotation, DGW/BGW analysis</div>
+  </div>
+  <table class="fields">
+    <thead><tr><th>Field</th><th>What it means</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>Unique fixture ID</td><td>Official FPL fixtures API</td></tr>
+      <tr><td><code>event</code></td><td>Gameweek number (null if unscheduled/postponed)</td><td>Official FPL fixtures API</td></tr>
+      <tr><td><code>team_h</code></td><td>Home team ID → <code>teams[].id</code></td><td>Official FPL fixtures API</td></tr>
+      <tr><td><code>team_a</code></td><td>Away team ID → <code>teams[].id</code></td><td>Official FPL fixtures API</td></tr>
+      <tr><td><code>team_h_score</code></td><td>Home score, when played</td><td>Official FPL fixtures API</td></tr>
+      <tr><td><code>team_a_score</code></td><td>Away score, when played</td><td>Official FPL fixtures API</td></tr>
+      <tr><td><code>finished</code></td><td>Whether fixture has finished</td><td>Official FPL fixtures API</td></tr>
+      <tr><td><code>kickoff_time</code></td><td>Scheduled kick-off (ISO 8601 UTC)</td><td>Official FPL fixtures API</td></tr>
+      <tr><td><code>minutes</code></td><td>Fixture minutes played</td><td>Official FPL fixtures API</td></tr>
+      <tr><td><code>provisional_start_time</code></td><td>Whether kick-off time is provisional</td><td>Official FPL fixtures API</td></tr>
+      <tr><td><code>difficulty</code> <span class="pill warn">actual names</span></td><td>FPL's fixture difficulty rating — delivered as <code>team_h_difficulty</code> and <code>team_a_difficulty</code> (one per side)</td><td>Official FPL fixtures API</td></tr>
+      <tr><td><code>stats</code></td><td>Player-level fixture statistics (goals, assists, bonus, bps… per side)</td><td>Official FPL fixtures API</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===================== 4 GAMEWEEKS ===================== -->
+<section id="gameweeks">
+  <h2>4. Gameweek fields <span class="pill fpl">Official FPL bootstrap-static API</span></h2>
+  <div class="meta">
+    <div><b>Transfer method</b>REST API — HTTP GET, JSON, no auth</div>
+    <div><b>Payload key</b><code>events[]</code> (38 gameweeks)</div>
+    <div><b>Live GW</b>exactly one event has <code>is_current</code> = true</div>
+  </div>
+  <table class="fields">
+    <thead><tr><th>Field</th><th>What it means</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>Gameweek number</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>name</code></td><td>Gameweek name (e.g. "Gameweek 1")</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>deadline_time</code></td><td>Transfer deadline (UTC)</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>finished</code></td><td>Whether GW has finished</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>is_current</code></td><td>Whether this is the current GW</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>is_next</code></td><td>Whether this is the next GW</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>average_entry_score</code></td><td>Average FPL score for the GW</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>highest_score</code></td><td>Highest GW score</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>most_selected</code></td><td>Most-selected player (player <code>id</code>)</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>most_transferred_in</code></td><td>Most transferred-in player (player <code>id</code>)</td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>most_transferred_out</code> <span class="pill warn">verify</span></td><td>Most transferred-out player — <em>not present in today's payload; use <code>transfers_out_event</code> on players instead</em></td><td>Official FPL bootstrap-static API</td></tr>
+      <tr><td><code>highest_scoring_entry</code></td><td>Highest-scoring team (manager entry ID)</td><td>Official FPL bootstrap-static API</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Also useful from the same payload: <code>data_checked</code> (final points confirmed), <code>can_manage</code> (before deadline), <code>most_captained</code>, <code>top_element</code>, <code>chip_plays</code>.</p>
+</section>
+
+<!-- ===================== 5 PRICE CHANGES ===================== -->
+<section id="price">
+  <h2>5. Price-change fields <span class="pill price">Official FPL Price Change Predictor</span> <span class="pill fpl">Official FPL API</span></h2>
+  <div class="meta">
+    <div><b>Transfer method</b>REST API — HTTP GET, JSON, no auth (same <code>bootstrap-static</code> payload)</div>
+    <div><b>Refresh</b>FPL updates predictor progress every ~15 min; threshold assessed ~00:00 UK</div>
+    <div><b>Why separate</b>price farming is an explicit part of the strategy — check every weekly analysis</div>
+  </div>
+  <table class="fields">
+    <thead><tr><th>Field</th><th>What it means</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td><code>now_cost</code></td><td>Current player price (×10)</td><td>Official FPL API</td></tr>
+      <tr><td><code>cost_change_event</code></td><td>Price movement in current GW</td><td>Official FPL API</td></tr>
+      <tr><td><code>cost_change_start</code></td><td>Total price movement since GW1</td><td>Official FPL API</td></tr>
+      <tr><td><code>transfers_in_event</code></td><td>Current-GW buying pressure</td><td>Official FPL API</td></tr>
+      <tr><td><code>transfers_out_event</code></td><td>Current-GW selling pressure</td><td>Official FPL API</td></tr>
+      <tr><td><code>selected_by_percent</code></td><td>Current ownership</td><td>Official FPL API</td></tr>
+      <tr><td><code>price_change_progress</code> → <code>price_change_percent</code></td><td>Progress towards next price rise/fall (%). Actual API field name is <code>price_change_percent</code> (string)</td><td>Official FPL Price Change Predictor</td></tr>
+      <tr><td><code>predicted_progress</code> → <code>price_change_projections</code></td><td>Predicted progress towards a price change. Actual API field is a list of <code>{offset, projected_percent, likelihood}</code> at future deadlines</td><td>Official FPL Price Change Predictor</td></tr>
+      <tr><td><code>price_change_hourly_rate</code></td><td>Rate at which progress is moving</td><td>Official FPL Price Change Predictor</td></tr>
+      <tr><td><code>price_change_locked_until</code></td><td>Price frozen until this time (e.g. just after a change)</td><td>Official FPL Price Change Predictor</td></tr>
+      <tr><td><code>price_change_calibrating</code></td><td>Predictor still calibrating for this player</td><td>Official FPL Price Change Predictor</td></tr>
+      <tr><td><code>game_config.settings.price_change_deadlines</code></td><td>Upcoming price-change assessment times</td><td>Official FPL Price Change Predictor</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">The predictor values are <strong>not</strong> a guaranteed price change. FPL explicitly describes it as a guide, with the threshold assessed around 00:00 UK time. Store them as evidence; the Python engine turns them into a price-change-risk assessment.</div>
+</section>
+
+<!-- ===================== 6 TEAM NEWS ===================== -->
+<section id="news">
+  <h2>6. Team-news fields <span class="pill pl">Official Premier League / club sources</span></h2>
+  <div class="meta">
+    <div><b>Transfer method</b>Web retrieval — HTTP GET of official web pages / RSS feeds, parsed into structured records by the backend. No public JSON API. Manual entry is an acceptable initial fallback.</div>
+    <div><b>Access</b>premierleague.com news; each club's official website (URLs configured per club)</div>
+    <div><b>Attribution</b>every record stores source URL + retrieved-at timestamp</div>
+  </div>
+  <table class="fields">
+    <thead><tr><th>Field</th><th>What it means</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td><code>availability_status</code></td><td>Whether player is available</td><td>Official PL / club</td></tr>
+      <tr><td><code>injury</code></td><td>Confirmed injury information</td><td>Official club / PL</td></tr>
+      <tr><td><code>injury_return_date</code></td><td>Expected/confirmed return</td><td>Official club / PL</td></tr>
+      <tr><td><code>suspension</code></td><td>Suspension information</td><td>Official PL / club</td></tr>
+      <tr><td><code>manager_quote</code></td><td>Manager's comments regarding player</td><td>Official club</td></tr>
+      <tr><td><code>team_selection</code></td><td>Confirmed starting XI once available</td><td>Official club / PL</td></tr>
+      <tr><td><code>expected_start</code> <span class="pill der">derived</span></td><td>Evidence regarding expected selection</td><td>Derived from official club / PL sources</td></tr>
+      <tr><td><code>minutes_expectation</code> <span class="pill der">derived</span></td><td>Evidence about likely playing time</td><td>Derived from official club / PL sources</td></tr>
+      <tr><td><code>rotation_risk</code> <span class="pill der">derived</span></td><td>Assessment of rotation risk</td><td>Derived from official sources</td></tr>
+    </tbody>
+  </table>
+  <p class="note"><code>expected_start</code>, <code>minutes_expectation</code> and <code>rotation_risk</code> are <strong>our derived fields</strong>, not official database fields. FotMob may supplement qualitative context (injury context, transfer risk, rotation) but never replaces Understat for statistics.</p>
+</section>
+
+<!-- ===================== 7 UNDERSTAT ===================== -->
+<section id="understat">
+  <h2>7. Underlying performance fields <span class="pill und">Understat</span></h2>
+  <div class="meta">
+    <div><b>Transfer method</b>Web scraping — HTTP GET of Understat pages; the JSON embedded in <code>&lt;script&gt;</code> tags is extracted and parsed. There is no official Understat API.</div>
+    <div><b>Access</b><code>understat.com/league/EPL/{season}</code> · <code>/team/{team}/{season}</code> · <code>/player/{id}</code></div>
+    <div><b>Join key</b>player name + team (Understat IDs ≠ FPL IDs — mapping table required)</div>
+  </div>
+  <table class="fields">
+    <thead><tr><th>Field</th><th>What it means</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td><code>xG</code></td><td>Expected goals (Understat model)</td><td>Understat</td></tr>
+      <tr><td><code>xA</code></td><td>Expected assists</td><td>Understat</td></tr>
+      <tr><td><code>npxG</code></td><td>Non-penalty expected goals</td><td>Understat</td></tr>
+      <tr><td><code>npxG+xA</code></td><td>Non-penalty xG plus xA</td><td>Understat</td></tr>
+      <tr><td><code>shots</code></td><td>Shots taken</td><td>Understat</td></tr>
+      <tr><td><code>key_passes</code></td><td>Key passes</td><td>Understat</td></tr>
+      <tr><td><code>minutes</code></td><td>Minutes used to contextualise underlying numbers</td><td>Understat</td></tr>
+      <tr><td><code>team_xG</code></td><td>Team attacking xG</td><td>Understat</td></tr>
+      <tr><td><code>team_xGA</code></td><td>Team defensive xGA</td><td>Understat</td></tr>
+      <tr><td><code>per_90_rates</code></td><td>Player underlying per-90 rates</td><td>Understat</td></tr>
+    </tbody>
+  </table>
+  <div class="callout blue">The FPL API also provides xG/xA fields, but Understat is the <strong>canonical underlying-data source</strong> for the model so methodologies are not mixed. FPL's <code>expected_*</code> fields are stored but treated as FPL-side reference values, not the analysis input.</div>
+</section>
+
+<!-- ===================== 8 DERIVED ===================== -->
+<section id="derived">
+  <h2>8. Derived fields <span class="pill der">Our Python analysis engine</span></h2>
+  <div class="meta">
+    <div><b>Transfer method</b>Internal — computed deterministically by the FastAPI backend from SQLite; exposed to the frontend and the LLM over REST/JSON</div>
+    <div><b>Principle</b>Python = source of truth + calculations · LLM = reasoning + explanation</div>
+    <div><b>Provenance</b>each derived value records the input fields and sources it was computed from</div>
+  </div>
+  <table class="fields">
+    <thead><tr><th>Field</th><th>What it means</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td><code>minutes_reliability</code></td><td>How dependable the player's minutes are</td><td>Derived — FPL <code>minutes</code>/<code>starts</code> + team news</td></tr>
+      <tr><td><code>ninety_minute_likelihood</code></td><td>Probability of playing the full 90</td><td>Derived — FPL + team news</td></tr>
+      <tr><td><code>xG_per_90</code></td><td>Expected goals per 90 minutes</td><td>Derived — Understat</td></tr>
+      <tr><td><code>xA_per_90</code></td><td>Expected assists per 90 minutes</td><td>Derived — Understat</td></tr>
+      <tr><td><code>xGC_per_90</code></td><td>Expected goals conceded per 90 minutes</td><td>Derived — Understat team xGA</td></tr>
+      <tr><td><code>points_per_million</code></td><td>FPL points per £1m of price</td><td>Derived — FPL <code>total_points</code>/<code>now_cost</code></td></tr>
+      <tr><td><code>xG_per_million</code></td><td>xG per £1m of price</td><td>Derived — Understat + FPL price</td></tr>
+      <tr><td><code>fixture_adjusted_projection</code></td><td>Projection adjusted for upcoming fixture difficulty</td><td>Derived — Understat + FPL fixtures/FDR</td></tr>
+      <tr><td><code>opportunity_cost</code></td><td>Cost of making this move versus alternatives / rolling</td><td>Derived — squad + free transfers + candidates</td></tr>
+      <tr><td><code>price_rise_probability</code></td><td>Interpretation of predictor progress as risk of imminent price change</td><td>Derived — FPL Price Change Predictor fields</td></tr>
+      <tr><td><code>transfer_recommendation</code></td><td>BUY / HOLD / WAIT with reasons, risks and confidence</td><td>Derived — analysis engine + LLM explanation</td></tr>
+      <tr><td><code>chip_timing</code></td><td>Suggested timing for wildcard / free hit / bench boost / triple captain</td><td>Derived — fixtures, squad state, chip windows</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<p class="note" style="text-align:center;margin-bottom:24px">FPL AI project · field map generated 20 September 2026 · sources: <em>fpl-ai-data-sources-and-fields.md</em>, <em>fpl-api-bootstrap-static-reference.md</em></p>
+
+</div></main>
+
+<script>
+  // Simple client-side filter across all field tables
+  const q = document.getElementById('q'), count = document.getElementById('count');
+  const rows = Array.from(document.querySelectorAll('table.fields tbody tr'));
+  const sections = Array.from(document.querySelectorAll('section[id]:not(#sources)'));
+  function update(){
+    const t = q.value.trim().toLowerCase(); let shown = 0;
+    rows.forEach(r => { const hit = !t || r.textContent.toLowerCase().includes(t); r.style.display = hit ? '' : 'none'; if (hit) shown++; });
+    sections.forEach(s => { const any = Array.from(s.querySelectorAll('tbody tr')).some(r => r.style.display !== 'none'); s.style.display = any ? '' : 'none'; });
+    count.textContent = shown + ' of ' + rows.length + ' fields' + (t ? ' match' : '');
+  }
+  q.addEventListener('input', update); update();
+</script>
+</body>
+</html>
